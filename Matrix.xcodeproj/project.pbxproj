@@ -1,0 +1,635 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0DF975F12F613B1B00A1FA31 /* aria2c in Resources */ = {isa = PBXBuildFile; fileRef = 0DF975F02F613B1B00A1FA31 /* aria2c */; };
+		0DF975F22F613B1B00A1FA31 /* aria2.conf in Resources */ = {isa = PBXBuildFile; fileRef = 0DF975EF2F613B1B00A1FA31 /* aria2.conf */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0DF975932F6103B100A1FA31 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0DF9757D2F6103AF00A1FA31 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0DF975842F6103AF00A1FA31;
+			remoteInfo = Matrix;
+		};
+		0DF9759D2F6103B100A1FA31 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0DF9757D2F6103AF00A1FA31 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0DF975842F6103AF00A1FA31;
+			remoteInfo = Matrix;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0DF975852F6103AF00A1FA31 /* Matrix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Matrix.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0DF975922F6103B100A1FA31 /* MatrixTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MatrixTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0DF9759C2F6103B100A1FA31 /* MatrixUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MatrixUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0DF975EF2F613B1B00A1FA31 /* aria2.conf */ = {isa = PBXFileReference; lastKnownFileType = text; path = aria2.conf; sourceTree = "<group>"; };
+		0DF975F02F613B1B00A1FA31 /* aria2c */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = aria2c; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		0DF975ED2F6130CA00A1FA31 /* Exceptions for "Matrix" folder in "Matrix" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 0DF975842F6103AF00A1FA31 /* Matrix */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		0DF975872F6103AF00A1FA31 /* Matrix */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				0DF975ED2F6130CA00A1FA31 /* Exceptions for "Matrix" folder in "Matrix" target */,
+			);
+			path = Matrix;
+			sourceTree = "<group>";
+		};
+		0DF975952F6103B100A1FA31 /* MatrixTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = MatrixTests;
+			sourceTree = "<group>";
+		};
+		0DF9759F2F6103B100A1FA31 /* MatrixUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = MatrixUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		0DF975822F6103AF00A1FA31 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0DF9758F2F6103B100A1FA31 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0DF975992F6103B100A1FA31 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0DF9757C2F6103AF00A1FA31 = {
+			isa = PBXGroup;
+			children = (
+				0DF975EE2F613ADF00A1FA31 /* bin */,
+				0DF975872F6103AF00A1FA31 /* Matrix */,
+				0DF975952F6103B100A1FA31 /* MatrixTests */,
+				0DF9759F2F6103B100A1FA31 /* MatrixUITests */,
+				0DF975862F6103AF00A1FA31 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		0DF975862F6103AF00A1FA31 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0DF975852F6103AF00A1FA31 /* Matrix.app */,
+				0DF975922F6103B100A1FA31 /* MatrixTests.xctest */,
+				0DF9759C2F6103B100A1FA31 /* MatrixUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		0DF975EE2F613ADF00A1FA31 /* bin */ = {
+			isa = PBXGroup;
+			children = (
+				0DF975EF2F613B1B00A1FA31 /* aria2.conf */,
+				0DF975F02F613B1B00A1FA31 /* aria2c */,
+			);
+			path = bin;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0DF975842F6103AF00A1FA31 /* Matrix */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0DF975A62F6103B100A1FA31 /* Build configuration list for PBXNativeTarget "Matrix" */;
+			buildPhases = (
+				0DF975812F6103AF00A1FA31 /* Sources */,
+				0DF975822F6103AF00A1FA31 /* Frameworks */,
+				0DF975832F6103AF00A1FA31 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				0DF975872F6103AF00A1FA31 /* Matrix */,
+			);
+			name = Matrix;
+			packageProductDependencies = (
+			);
+			productName = Matrix;
+			productReference = 0DF975852F6103AF00A1FA31 /* Matrix.app */;
+			productType = "com.apple.product-type.application";
+		};
+		0DF975912F6103B100A1FA31 /* MatrixTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0DF975A92F6103B100A1FA31 /* Build configuration list for PBXNativeTarget "MatrixTests" */;
+			buildPhases = (
+				0DF9758E2F6103B100A1FA31 /* Sources */,
+				0DF9758F2F6103B100A1FA31 /* Frameworks */,
+				0DF975902F6103B100A1FA31 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0DF975942F6103B100A1FA31 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				0DF975952F6103B100A1FA31 /* MatrixTests */,
+			);
+			name = MatrixTests;
+			packageProductDependencies = (
+			);
+			productName = MatrixTests;
+			productReference = 0DF975922F6103B100A1FA31 /* MatrixTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		0DF9759B2F6103B100A1FA31 /* MatrixUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0DF975AC2F6103B100A1FA31 /* Build configuration list for PBXNativeTarget "MatrixUITests" */;
+			buildPhases = (
+				0DF975982F6103B100A1FA31 /* Sources */,
+				0DF975992F6103B100A1FA31 /* Frameworks */,
+				0DF9759A2F6103B100A1FA31 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0DF9759E2F6103B100A1FA31 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				0DF9759F2F6103B100A1FA31 /* MatrixUITests */,
+			);
+			name = MatrixUITests;
+			packageProductDependencies = (
+			);
+			productName = MatrixUITests;
+			productReference = 0DF9759C2F6103B100A1FA31 /* MatrixUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0DF9757D2F6103AF00A1FA31 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2630;
+				LastUpgradeCheck = 2630;
+				TargetAttributes = {
+					0DF975842F6103AF00A1FA31 = {
+						CreatedOnToolsVersion = 26.3;
+					};
+					0DF975912F6103B100A1FA31 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = 0DF975842F6103AF00A1FA31;
+					};
+					0DF9759B2F6103B100A1FA31 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = 0DF975842F6103AF00A1FA31;
+					};
+				};
+			};
+			buildConfigurationList = 0DF975802F6103AF00A1FA31 /* Build configuration list for PBXProject "Matrix" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 0DF9757C2F6103AF00A1FA31;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 0DF975862F6103AF00A1FA31 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0DF975842F6103AF00A1FA31 /* Matrix */,
+				0DF975912F6103B100A1FA31 /* MatrixTests */,
+				0DF9759B2F6103B100A1FA31 /* MatrixUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		0DF975832F6103AF00A1FA31 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0DF975F12F613B1B00A1FA31 /* aria2c in Resources */,
+				0DF975F22F613B1B00A1FA31 /* aria2.conf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0DF975902F6103B100A1FA31 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0DF9759A2F6103B100A1FA31 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0DF975812F6103AF00A1FA31 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0DF9758E2F6103B100A1FA31 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0DF975982F6103B100A1FA31 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0DF975942F6103B100A1FA31 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0DF975842F6103AF00A1FA31 /* Matrix */;
+			targetProxy = 0DF975932F6103B100A1FA31 /* PBXContainerItemProxy */;
+		};
+		0DF9759E2F6103B100A1FA31 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0DF975842F6103AF00A1FA31 /* Matrix */;
+			targetProxy = 0DF9759D2F6103B100A1FA31 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0DF975A42F6103B100A1FA31 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 9BD666WHWR;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		0DF975A52F6103B100A1FA31 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 9BD666WHWR;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		0DF975A72F6103B100A1FA31 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 20260407;
+				DEVELOPMENT_TEAM = 9BD666WHWR;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
+				ENABLE_USER_SELECTED_FILES = readwrite;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Matrix/Info.plist;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.liao.Matrix;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		0DF975A82F6103B100A1FA31 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 20260407;
+				DEVELOPMENT_TEAM = 9BD666WHWR;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
+				ENABLE_USER_SELECTED_FILES = readwrite;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Matrix/Info.plist;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.liao.Matrix;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		0DF975AA2F6103B100A1FA31 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9BD666WHWR;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.liao.MatrixTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Matrix.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Matrix";
+			};
+			name = Debug;
+		};
+		0DF975AB2F6103B100A1FA31 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9BD666WHWR;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.liao.MatrixTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Matrix.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Matrix";
+			};
+			name = Release;
+		};
+		0DF975AD2F6103B100A1FA31 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9BD666WHWR;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.liao.MatrixUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Matrix;
+			};
+			name = Debug;
+		};
+		0DF975AE2F6103B100A1FA31 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9BD666WHWR;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.liao.MatrixUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Matrix;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0DF975802F6103AF00A1FA31 /* Build configuration list for PBXProject "Matrix" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0DF975A42F6103B100A1FA31 /* Debug */,
+				0DF975A52F6103B100A1FA31 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0DF975A62F6103B100A1FA31 /* Build configuration list for PBXNativeTarget "Matrix" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0DF975A72F6103B100A1FA31 /* Debug */,
+				0DF975A82F6103B100A1FA31 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0DF975A92F6103B100A1FA31 /* Build configuration list for PBXNativeTarget "MatrixTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0DF975AA2F6103B100A1FA31 /* Debug */,
+				0DF975AB2F6103B100A1FA31 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0DF975AC2F6103B100A1FA31 /* Build configuration list for PBXNativeTarget "MatrixUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0DF975AD2F6103B100A1FA31 /* Debug */,
+				0DF975AE2F6103B100A1FA31 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0DF9757D2F6103AF00A1FA31 /* Project object */;
+}
