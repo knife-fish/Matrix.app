@@ -293,7 +293,11 @@ actor Aria2RPCService {
     init(rpcURL: URL? = nil) {
         let resolvedURL = rpcURL ?? URL(string: "http://localhost:16800/jsonrpc")!
         self.rpcURL = resolvedURL
-        self.session = URLSession.shared
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 15
+        configuration.timeoutIntervalForResource = 15
+        configuration.waitsForConnectivity = false
+        self.session = URLSession(configuration: configuration)
         self.currentPort = resolvedURL.port ?? 16800
     }
 
@@ -312,12 +316,12 @@ actor Aria2RPCService {
         return String(requestID)
     }
     
-    private func sendRequest<T: Codable>(method: String, params: [Any] = []) async throws -> T {
+    private func sendRequest<T: Codable>(method: String, params: [Any] = [], usesAria2Namespace: Bool = true) async throws -> T {
         let id = generateID()
         let request = Aria2Request(
             jsonrpc: "2.0",
             id: id,
-            method: "aria2.\(method)",
+            method: usesAria2Namespace ? "aria2.\(method)" : method,
             params: params.map { AnyCodable($0) }
         )
         
@@ -349,6 +353,13 @@ actor Aria2RPCService {
         }
         
         return result
+    }
+
+    private func statusParams(gid: String, keys: [String]?) -> [Any] {
+        if let keys, !keys.isEmpty {
+            return [gid, keys]
+        }
+        return [gid]
     }
     
     func addDownload(
@@ -413,9 +424,26 @@ actor Aria2RPCService {
         return gids
     }
 
-    func getStatus(gid: String) async throws -> Aria2Status {
-        let params: [Any] = [gid]
+    func getStatus(gid: String, keys: [String]? = nil) async throws -> Aria2Status {
+        let params = statusParams(gid: gid, keys: keys)
         return try await sendRequest(method: "tellStatus", params: params)
+    }
+
+    func getStatuses(gids: [String], keys: [String]? = nil) async throws -> [Aria2Status] {
+        guard !gids.isEmpty else { return [] }
+
+        let calls = gids.map { gid in
+            [
+                "methodName": "aria2.tellStatus",
+                "params": statusParams(gid: gid, keys: keys)
+            ]
+        }
+        let results: [[Aria2Status]] = try await sendRequest(
+            method: "system.multicall",
+            params: [calls],
+            usesAria2Namespace: false
+        )
+        return results.compactMap(\.first)
     }
 
     func getFiles(gid: String) async throws -> [Aria2File] {
@@ -460,17 +488,24 @@ actor Aria2RPCService {
         return resultGid
     }
     
-    func getActiveDownloads() async throws -> [Aria2Status] {
-        return try await sendRequest(method: "tellActive")
+    func getActiveDownloads(keys: [String]? = nil) async throws -> [Aria2Status] {
+        let params: [Any] = if let keys, !keys.isEmpty { [keys] } else { [] }
+        return try await sendRequest(method: "tellActive", params: params)
     }
-    
-    func getWaitingDownloads(offset: Int = 0, num: Int = 100) async throws -> [Aria2Status] {
-        let params: [Any] = [offset, num]
+
+    func getWaitingDownloads(offset: Int = 0, num: Int = 100, keys: [String]? = nil) async throws -> [Aria2Status] {
+        var params: [Any] = [offset, num]
+        if let keys, !keys.isEmpty {
+            params.append(keys)
+        }
         return try await sendRequest(method: "tellWaiting", params: params)
     }
-    
-    func getStoppedDownloads(offset: Int = 0, num: Int = 100) async throws -> [Aria2Status] {
-        let params: [Any] = [offset, num]
+
+    func getStoppedDownloads(offset: Int = 0, num: Int = 100, keys: [String]? = nil) async throws -> [Aria2Status] {
+        var params: [Any] = [offset, num]
+        if let keys, !keys.isEmpty {
+            params.append(keys)
+        }
         return try await sendRequest(method: "tellStopped", params: params)
     }
     

@@ -17,6 +17,41 @@ final class TaskListViewModel: ObservableObject {
     private let persistenceURL: URL
     private var recentlyDeletedGIDs = [String: Date]()
     private var recentlyDeletedIdentityKeys = [String: Date]()
+    private var isRefreshingTasks = false
+    private var lastRemoteDiscoveryAt: Date?
+
+    private let summaryStatusKeys = [
+        "gid",
+        "status",
+        "totalLength",
+        "completedLength",
+        "downloadSpeed",
+        "uploadSpeed",
+        "connections",
+        "errorMessage",
+        "numSeeders",
+        "seeder",
+        "pieceLength",
+        "bitfield"
+    ]
+
+    private let discoveryStatusKeys = [
+        "gid",
+        "status",
+        "totalLength",
+        "completedLength",
+        "downloadSpeed",
+        "uploadSpeed",
+        "connections",
+        "errorMessage",
+        "numSeeders",
+        "seeder",
+        "pieceLength",
+        "bitfield",
+        "dir",
+        "files",
+        "bittorrent"
+    ]
 
     init(settingsStore: SettingsStore, aria2Service: Aria2RPCService = .shared) {
         self.aria2Service = aria2Service
@@ -252,21 +287,21 @@ final class TaskListViewModel: ObservableObject {
     func refreshTasks() async {
         let isRunning = await Aria2ProcessManager.shared.checkStatus()
         guard isRunning else { return }
+        guard !isRefreshingTasks else { return }
+        isRefreshingTasks = true
+        defer { isRefreshingTasks = false }
         await syncRPCPort()
         pruneRecentlyDeletedMarkers()
 
         do {
-            async let active = aria2Service.getActiveDownloads()
-            async let waiting = aria2Service.getWaitingDownloads()
-            async let stopped = aria2Service.getStoppedDownloads()
-
-            let allStatuses = try await (active + waiting + stopped)
+            let gids = tasks.compactMap(\.gid)
+            let knownStatuses = try await aria2Service.getStatuses(gids: gids, keys: summaryStatusKeys)
             var totalDownloadSpeed: Int64 = 0
             var totalUploadSpeed: Int64 = 0
             var matchedTaskIDs = Set<UUID>()
 
-            for status in allStatuses {
-                guard let index = matchIndex(for: status, excluding: matchedTaskIDs) else { continue }
+            for status in knownStatuses {
+                guard let index = tasks.firstIndex(where: { $0.gid == status.gid }) else { continue }
                 let previous = tasks[index]
                 let updated = merge(task: tasks[index], with: status)
                 tasks[index] = updated
@@ -291,16 +326,18 @@ final class TaskListViewModel: ObservableObject {
                 }
             }
 
-            for status in allStatuses where !matchedTaskIDs.contains(where: { id in
-                tasks.first(where: { $0.id == id })?.gid == status.gid
-            }) {
-                guard tasks.contains(where: { $0.gid == status.gid }) == false else { continue }
-                guard !isRecentlyDeleted(status: status) else { continue }
-                let recoveredTask = recoveredTask(from: status)
-                tasks.insert(recoveredTask, at: 0)
-                matchedTaskIDs.insert(recoveredTask.id)
-                totalDownloadSpeed += recoveredTask.speed
-                totalUploadSpeed += recoveredTask.uploadSpeed
+            if shouldPerformRemoteDiscovery() {
+                let discoveryStatuses = try await fetchDiscoveryStatuses()
+                for status in discoveryStatuses {
+                    guard tasks.contains(where: { $0.gid == status.gid }) == false else { continue }
+                    guard !isRecentlyDeleted(status: status) else { continue }
+                    guard let recoveredTask = recoveredTask(from: status) else { continue }
+                    tasks.insert(recoveredTask, at: 0)
+                    matchedTaskIDs.insert(recoveredTask.id)
+                    totalDownloadSpeed += recoveredTask.speed
+                    totalUploadSpeed += recoveredTask.uploadSpeed
+                }
+                lastRemoteDiscoveryAt = .now
             }
 
             globalDownloadSpeed = totalDownloadSpeed
@@ -322,6 +359,18 @@ final class TaskListViewModel: ObservableObject {
                 Task { await self?.refreshTasks() }
             }
             .store(in: &cancellables)
+    }
+
+    private func shouldPerformRemoteDiscovery(now: Date = .now) -> Bool {
+        guard let lastRemoteDiscoveryAt else { return true }
+        return now.timeIntervalSince(lastRemoteDiscoveryAt) >= 15
+    }
+
+    private func fetchDiscoveryStatuses() async throws -> [Aria2Status] {
+        async let active = aria2Service.getActiveDownloads(keys: discoveryStatusKeys)
+        async let waiting = aria2Service.getWaitingDownloads(keys: discoveryStatusKeys)
+        async let stopped = aria2Service.getStoppedDownloads(keys: discoveryStatusKeys)
+        return try await active + waiting + stopped
     }
 
     private func merge(task: DownloadTask, with status: Aria2Status) -> DownloadTask {
@@ -603,7 +652,7 @@ final class TaskListViewModel: ObservableObject {
         recentlyDeletedIdentityKeys = recentlyDeletedIdentityKeys.filter { $0.value > now }
     }
 
-    private func recoveredTask(from status: Aria2Status) -> DownloadTask {
+    private func recoveredTask(from status: Aria2Status) -> DownloadTask? {
         let source = resolvedSource(from: status)
         let kind: TaskKind
         if let source, source.hasPrefix("magnet:") {
@@ -616,12 +665,17 @@ final class TaskListViewModel: ObservableObject {
             kind = .direct
         }
 
+        let resolvedFilename = resolvedFilename(from: status).nilIfBlank ?? status.gid
+        let resolvedSavePath = status.dir?.nilIfBlank ?? settingsStore.settings.defaultDownloadPath
+        let resolvedURL = source?.nilIfBlank ?? status.gid
+        guard !resolvedFilename.isEmpty else { return nil }
+
         var task = DownloadTask(
-            url: source ?? status.gid,
-            filename: resolvedFilename(from: status).nilIfBlank ?? status.gid,
+            url: resolvedURL,
+            filename: resolvedFilename,
             kind: kind,
             status: .waiting,
-            savePath: status.dir ?? settingsStore.settings.defaultDownloadPath,
+            savePath: resolvedSavePath,
             gid: status.gid
         )
         task = merge(task: task, with: status)
