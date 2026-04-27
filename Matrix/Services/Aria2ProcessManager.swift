@@ -10,6 +10,11 @@ struct Aria2RuntimePaths {
     let pidURL: URL
 }
 
+nonisolated private struct Aria2PIDRecord: Codable {
+    let pid: Int32
+    let rpcPort: Int
+}
+
 enum Aria2ProcessError: LocalizedError {
     case executableNotFound
     case configFileNotFound
@@ -149,7 +154,7 @@ actor Aria2ProcessManager {
             self.process = process
             self.externalPID = process.processIdentifier
             self.isRunning = true
-            persistPID(process.processIdentifier)
+            persistPID(process.processIdentifier, rpcPort: currentPort)
             
             Task {
                 await monitorOutput(pipe: outputPipe, isError: false)
@@ -487,28 +492,45 @@ actor Aria2ProcessManager {
 
     private func recoverManagedProcessFromPIDFile() -> (pid: pid_t, rpcPort: Int?)? {
         guard let runtimePaths else { return nil }
-        guard let pidString = try? String(contentsOf: runtimePaths.pidURL, encoding: .utf8)
-            .trimmingCharacters(in: .whitespacesAndNewlines),
-              let pid = pid_t(pidString),
-              pid > 0 else {
+        guard let persisted = loadPIDRecord(from: runtimePaths.pidURL) else {
             return nil
         }
-        guard isProcessAlive(pid: pid) else {
+        guard isProcessAlive(pid: persisted.pid) else {
             clearPIDFile()
             return nil
         }
-        let rpcPort = currentPort > 0 ? currentPort : 16800
-        return (pid: pid, rpcPort: rpcPort)
+        return (pid: persisted.pid, rpcPort: persisted.rpcPort)
     }
 
-    private func persistPID(_ pid: pid_t) {
+    private func persistPID(_ pid: pid_t, rpcPort: Int) {
         guard let runtimePaths else { return }
-        try? String(pid).write(to: runtimePaths.pidURL, atomically: true, encoding: .utf8)
+        let record = Aria2PIDRecord(pid: pid, rpcPort: rpcPort)
+        guard let data = try? JSONEncoder().encode(record) else { return }
+        try? data.write(to: runtimePaths.pidURL, options: .atomic)
     }
 
     private func clearPIDFile() {
         guard let runtimePaths else { return }
         try? FileManager.default.removeItem(at: runtimePaths.pidURL)
+    }
+
+    private func loadPIDRecord(from url: URL) -> (pid: pid_t, rpcPort: Int?)? {
+        if let data = try? Data(contentsOf: url),
+           let record = try? JSONDecoder().decode(Aria2PIDRecord.self, from: data),
+           record.pid > 0 {
+            let rpcPort = record.rpcPort > 0 ? record.rpcPort : nil
+            return (pid: record.pid, rpcPort: rpcPort)
+        }
+
+        guard let pidString = try? String(contentsOf: url, encoding: .utf8)
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+              let pid = pid_t(pidString),
+              pid > 0 else {
+            return nil
+        }
+
+        let fallbackPort = currentPort > 0 ? currentPort : nil
+        return (pid: pid, rpcPort: fallbackPort)
     }
 
     private func isTCPPortListening(_ port: Int) -> Bool {

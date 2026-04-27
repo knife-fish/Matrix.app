@@ -106,9 +106,26 @@ final class TaskListViewModel: ObservableObject {
         filename: String?,
         threadCount: Int
     ) async {
+        await MatrixDebugLogger.shared.log(
+            event: "task.addURLTasks.begin",
+            metadata: [
+                "count": String(urls.count),
+                "filename": filename ?? "<nil>",
+                "savePath": savePath,
+                "threadCount": String(threadCount)
+            ],
+            level: .info
+        )
         do {
             try await ensureRPCReady()
         } catch {
+            await MatrixDebugLogger.shared.log(
+                event: "task.addURLTasks.rpcNotReady",
+                metadata: [
+                    "error": error.localizedDescription
+                ],
+                level: .error
+            )
             lastErrorMessage = L10n.format("download_engine_not_ready", language: settingsStore.settings.appLanguage, error.localizedDescription)
             return
         }
@@ -119,6 +136,14 @@ final class TaskListViewModel: ObservableObject {
                 ?? URL(string: urlString)?.lastPathComponent.nilIfBlank
                 ?? "untitled"
             if hasExistingTask(url: urlString, savePath: savePath, filename: resolvedName) {
+                await MatrixDebugLogger.shared.log(
+                    event: "task.addURLTasks.duplicateSkipped",
+                    metadata: [
+                        "filename": resolvedName,
+                        "url": urlString
+                    ],
+                    level: .debug
+                )
                 continue
             }
             var task = DownloadTask(
@@ -132,6 +157,15 @@ final class TaskListViewModel: ObservableObject {
             persist()
 
             do {
+                await MatrixDebugLogger.shared.log(
+                    event: "task.addURLTasks.addDownload",
+                    metadata: [
+                        "filename": resolvedName,
+                        "startImmediately": startImmediately ? "true" : "false",
+                        "url": urlString
+                    ],
+                    level: .info
+                )
                 let gid = try await aria2Service.addDownload(
                     url: urlString,
                     savePath: savePath,
@@ -141,10 +175,28 @@ final class TaskListViewModel: ObservableObject {
                 )
                 task.gid = gid
                 update(task)
+                await MatrixDebugLogger.shared.log(
+                    event: "task.addURLTasks.success",
+                    metadata: [
+                        "filename": resolvedName,
+                        "gid": gid,
+                        "url": urlString
+                    ],
+                    level: .info
+                )
             } catch {
                 task.status = .error
                 task.errorMessage = error.localizedDescription
                 update(task)
+                await MatrixDebugLogger.shared.log(
+                    event: "task.addURLTasks.failure",
+                    metadata: [
+                        "error": error.localizedDescription,
+                        "filename": resolvedName,
+                        "url": urlString
+                    ],
+                    level: .error
+                )
                 lastErrorMessage = L10n.format("add_task_failed", language: settingsStore.settings.appLanguage, error.localizedDescription)
             }
         }
@@ -295,7 +347,41 @@ final class TaskListViewModel: ObservableObject {
 
         do {
             let gids = tasks.compactMap(\.gid)
-            let knownStatuses = try await aria2Service.getStatuses(gids: gids, keys: summaryStatusKeys)
+            await MatrixDebugLogger.shared.log(
+                event: "task.refresh.begin",
+                metadata: [
+                    "gidCount": String(gids.count),
+                    "taskCount": String(tasks.count)
+                ],
+                level: .debug
+            )
+            let batch = try await aria2Service.getStatusesBatch(gids: gids, keys: summaryStatusKeys)
+            let knownStatuses = batch.statuses
+            await MatrixDebugLogger.shared.log(
+                event: "task.refresh.statuses",
+                metadata: [
+                    "missingGIDCount": String(batch.missingGIDs.count),
+                    "receivedStatusCount": String(knownStatuses.count)
+                ],
+                level: .debug
+            )
+            if !batch.missingGIDs.isEmpty {
+                let beforeCount = tasks.count
+                tasks.removeAll { task in
+                    guard let gid = task.gid else { return false }
+                    return batch.missingGIDs.contains(gid)
+                }
+                if tasks.count != beforeCount {
+                    await MatrixDebugLogger.shared.log(
+                        event: "task.refresh.removedMissingGIDs",
+                        metadata: [
+                            "removedCount": String(beforeCount - tasks.count),
+                            "missingGIDs": batch.missingGIDs.joined(separator: ",")
+                        ],
+                        level: .info
+                    )
+                }
+            }
             var totalDownloadSpeed: Int64 = 0
             var totalUploadSpeed: Int64 = 0
             var matchedTaskIDs = Set<UUID>()
@@ -344,8 +430,18 @@ final class TaskListViewModel: ObservableObject {
             globalUploadSpeed = totalUploadSpeed
             persist()
         } catch {
+            await MatrixDebugLogger.shared.log(
+                event: "task.refresh.failure",
+                metadata: [
+                    "error": error.localizedDescription
+                ],
+                level: .error
+            )
             let nsError = error as NSError
             if nsError.domain == NSURLErrorDomain && (nsError.code == -1003 || nsError.code == -1004) {
+                return
+            }
+            if Aria2RPCService.isTransientTransportError(error) {
                 return
             }
             lastErrorMessage = L10n.format("refresh_tasks_failed", language: settingsStore.settings.appLanguage, error.localizedDescription)
@@ -778,8 +874,23 @@ final class TaskListViewModel: ObservableObject {
         for attempt in 0..<15 {
             do {
                 _ = try await aria2Service.getVersion()
+                await MatrixDebugLogger.shared.log(
+                    event: "task.ensureRPCReady.success",
+                    metadata: [
+                        "attempt": String(attempt)
+                    ],
+                    level: .debug
+                )
                 return
             } catch {
+                await MatrixDebugLogger.shared.log(
+                    event: "task.ensureRPCReady.retry",
+                    metadata: [
+                        "attempt": String(attempt),
+                        "error": error.localizedDescription
+                    ],
+                    level: .debug
+                )
                 if attempt == 14 { throw error }
                 try await Task.sleep(for: .milliseconds(200))
             }

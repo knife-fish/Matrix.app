@@ -28,6 +28,18 @@ struct MatrixApp: App {
         _aria2Manager = StateObject(wrappedValue: aria2Manager)
         _taskListViewModel = StateObject(wrappedValue: taskListViewModel)
         _menuBarInserted = State(initialValue: settingsStore.settings.showMenuBarExtra)
+
+        Task {
+            await MatrixDebugLogger.shared.log(
+                event: "app.init",
+                metadata: [
+                    "bundleID": Bundle.main.bundleIdentifier ?? "<nil>",
+                    "logPath": await MatrixDebugLogger.shared.path(),
+                    "version": Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "<nil>"
+                ],
+                level: .info
+            )
+        }
     }
 
     var body: some Scene {
@@ -160,12 +172,28 @@ final class Aria2Manager: ObservableObject {
         }
 
         do {
+            await MatrixDebugLogger.shared.log(event: "aria2.start.begin", metadata: [:], level: .info)
             try await startAria2WithRecovery()
+            await MatrixDebugLogger.shared.log(
+                event: "aria2.start.success",
+                metadata: [
+                    "port": String(rpcPort)
+                ],
+                level: .info
+            )
         } catch Aria2ProcessError.executableNotFound {
             isRunning = false
+            await MatrixDebugLogger.shared.log(event: "aria2.start.executableNotFound", metadata: [:], level: .error)
             errorMessage = L10n.text("aria2_executable_not_found", language: settingsStore.settings.appLanguage)
         } catch {
             isRunning = false
+            await MatrixDebugLogger.shared.log(
+                event: "aria2.start.failure",
+                metadata: [
+                    "error": error.localizedDescription
+                ],
+                level: .error
+            )
             errorMessage = L10n.format("aria2_start_failed", language: settingsStore.settings.appLanguage, error.localizedDescription)
         }
     }
@@ -309,6 +337,14 @@ final class Aria2Manager: ObservableObject {
     }
 
     private func startAria2Once(forceFresh: Bool = false) async throws {
+        await MatrixDebugLogger.shared.log(
+            event: "aria2.startOnce.begin",
+            metadata: [
+                "forceFresh": forceFresh ? "true" : "false",
+                "preferredPort": String(settingsStore.settings.rpcListenPort)
+            ],
+            level: .info
+        )
         let port = try await Aria2ProcessManager.shared.start(
             preferredRPCPort: settingsStore.settings.rpcListenPort,
             rpcListenAll: settingsStore.settings.rpcListenAll,
@@ -319,6 +355,14 @@ final class Aria2Manager: ObservableObject {
         await Aria2RPCService.shared.updatePort(port)
         try await waitForRPCReady(on: port)
         isRunning = await Aria2ProcessManager.shared.checkStatus()
+        await MatrixDebugLogger.shared.log(
+            event: "aria2.startOnce.ready",
+            metadata: [
+                "isRunning": isRunning ? "true" : "false",
+                "port": String(port)
+            ],
+            level: .info
+        )
         try? await refreshTrackersIfNeeded()
         try await applySettings()
         errorMessage = nil

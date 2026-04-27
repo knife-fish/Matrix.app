@@ -9,6 +9,7 @@ wildcat_settings
 build/
 DerivedData/
 .DerivedData/
+dist
 
 ## Various settings
 *.pbxuser

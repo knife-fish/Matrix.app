@@ -210,6 +210,23 @@
         }
       }
     },
+    "Application Debug Log" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Application Debug Log"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用调试日志"
+          }
+        }
+      }
+    },
     "applied_and_restarted" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -944,6 +961,23 @@
     "D %@" : {
 
     },
+    "Debug Log Path" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Debug Log Path"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "调试日志路径"
+          }
+        }
+      }
+    },
     "default_save_path" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1059,6 +1093,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "取消全选"
+          }
+        }
+      }
+    },
+    "dht_listen_port" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DHT Listen Port: %d"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DHT 监听端口: %d"
           }
         }
       }
@@ -1212,23 +1263,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已下载"
-          }
-        }
-      }
-    },
-    "dht_listen_port" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DHT Listen Port: %d"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DHT 监听端口: %d"
           }
         }
       }
@@ -2375,6 +2409,23 @@
         }
       }
     },
+    "quit_app" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quit App"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出应用"
+          }
+        }
+      }
+    },
     "reconnect_aria2" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2698,6 +2749,23 @@
         }
       }
     },
+    "rpc_listen_all" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listen on All Interfaces"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "监听所有网络接口"
+          }
+        }
+      }
+    },
     "rpc_port" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2728,23 +2796,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "RPC 监听端口"
-          }
-        }
-      }
-    },
-    "rpc_listen_all" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Listen on All Interfaces"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "监听所有网络接口"
           }
         }
       }
@@ -3374,23 +3425,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "显示主窗口"
-          }
-        }
-      }
-    },
-    "quit_app" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quit App"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "退出应用"
           }
         }
       }

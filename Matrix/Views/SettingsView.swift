@@ -279,6 +279,12 @@ struct SettingsView: View {
                                 Text(level.displayName).tag(level)
                             }
                         }
+                        Picker(L10n.text("Application Debug Log", language: language), selection: $draft.debugLogLevel) {
+                            ForEach(MatrixDebugLogLevel.allCases, id: \.self) { level in
+                                Text(level.displayName(language: language)).tag(level)
+                            }
+                        }
+                        LabeledContent(L10n.text("Debug Log Path", language: language), value: debugLogPathPlaceholder)
                         LabeledContent(L10n.text("config_path", language: language), value: awaitableConfigPathPlaceholder)
 
                         VStack(alignment: .leading, spacing: 8) {
@@ -352,6 +358,10 @@ struct SettingsView: View {
                 pickPath()
             }
         }
+    }
+
+    private var debugLogPathPlaceholder: String {
+        MatrixDebugLogger.logFileURL().path
     }
 
     @ViewBuilder

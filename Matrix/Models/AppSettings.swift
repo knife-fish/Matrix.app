@@ -42,6 +42,31 @@ enum Aria2LogLevel: String, Codable, CaseIterable {
     }
 }
 
+enum MatrixDebugLogLevel: String, Codable, CaseIterable {
+    case off
+    case error
+    case info
+    case debug
+
+    func displayName(language: AppLanguage) -> String {
+        switch self {
+        case .off: return "Off"
+        case .error: return "Error"
+        case .info: return "Info"
+        case .debug: return "Debug"
+        }
+    }
+
+    var priority: Int {
+        switch self {
+        case .debug: return 0
+        case .info: return 1
+        case .error: return 2
+        case .off: return 3
+        }
+    }
+}
+
 struct AppSettings: Codable, Equatable {
     var appLanguage: AppLanguage = .system
     var defaultDownloadPath: String = defaultDownloadPathValue()
@@ -51,6 +76,7 @@ struct AppSettings: Codable, Equatable {
     var downloadSpeedLimitKB: Int = 0
     var uploadSpeedLimitKB: Int = 0
     var logLevel: Aria2LogLevel = .notice
+    var debugLogLevel: MatrixDebugLogLevel = .off
     var enableNotifications: Bool = true
     var userAgent: String = "MotrixSwift/1.0"
     var deleteFilesWhenRemoving: Bool = false
@@ -96,6 +122,9 @@ final class SettingsStore: ObservableObject {
             self.settings = AppSettings()
             save()
         }
+        Task {
+            await MatrixDebugLogger.shared.configure(level: settings.debugLogLevel)
+        }
     }
 
     func update(_ mutate: (inout AppSettings) -> Void) {
@@ -130,6 +159,9 @@ final class SettingsStore: ObservableObject {
         let current = value ?? settings
         guard let data = try? JSONEncoder().encode(current) else { return }
         defaults.set(data, forKey: key)
+        Task {
+            await MatrixDebugLogger.shared.configure(level: current.debugLogLevel)
+        }
     }
 }
 

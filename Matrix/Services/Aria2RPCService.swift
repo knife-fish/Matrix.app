@@ -4,7 +4,7 @@ nonisolated enum Aria2Error: LocalizedError {
     case invalidURL
     case invalidResponse
     case rpcError(String)
-    case decodingError(Error)
+    case decodingError(underlying: Error, responsePreview: String?)
 
     var errorDescription: String? {
         switch self {
@@ -14,8 +14,14 @@ nonisolated enum Aria2Error: LocalizedError {
             return L10n.text("rpc_error_invalid_response", language: .system)
         case .rpcError(let message):
             return message
-        case .decodingError(let error):
-            return L10n.format("rpc_error_decoding", language: .system, error.localizedDescription)
+        case .decodingError(let error, let responsePreview):
+            let detail: String
+            if let responsePreview, !responsePreview.isEmpty {
+                detail = "\(error.localizedDescription) | Response: \(responsePreview)"
+            } else {
+                detail = error.localizedDescription
+            }
+            return L10n.format("rpc_error_decoding", language: .system, detail)
         }
     }
 }
@@ -37,6 +43,44 @@ nonisolated struct Aria2Response<T: Codable>: Codable {
 nonisolated struct Aria2ErrorDetail: Codable {
     let code: Int
     let message: String
+}
+
+nonisolated struct Aria2MulticallItem<T: Codable>: Codable {
+    let values: [T]
+    let error: Aria2ErrorDetail?
+
+    init(from decoder: Decoder) throws {
+        if let singleValue = try? decoder.singleValueContainer() {
+            if let value = try? singleValue.decode(T.self) {
+                values = [value]
+                error = nil
+                return
+            }
+
+            if let decodedError = try? singleValue.decode(Aria2ErrorDetail.self) {
+                values = []
+                error = decodedError
+                return
+            }
+        }
+
+        var container = try decoder.unkeyedContainer()
+
+        if let value = try? container.decode(T.self) {
+            values = [value]
+            error = nil
+            return
+        }
+
+        if let decodedError = try? container.decode(Aria2ErrorDetail.self) {
+            values = []
+            error = decodedError
+            return
+        }
+
+        values = []
+        error = nil
+    }
 }
 
 nonisolated struct Aria2Status: Codable {
@@ -285,6 +329,10 @@ nonisolated struct AnyCodable: Codable {
 actor Aria2RPCService {
     static let shared = Aria2RPCService()
 
+    private static let requestTimeout: TimeInterval = 30
+    private static let resourceTimeout: TimeInterval = 60
+    private static let maxRetryCount = 2
+
     private var rpcURL: URL
     private let session: URLSession
     private var requestID: Int = 0
@@ -294,8 +342,8 @@ actor Aria2RPCService {
         let resolvedURL = rpcURL ?? URL(string: "http://localhost:16800/jsonrpc")!
         self.rpcURL = resolvedURL
         let configuration = URLSessionConfiguration.default
-        configuration.timeoutIntervalForRequest = 15
-        configuration.timeoutIntervalForResource = 15
+        configuration.timeoutIntervalForRequest = Self.requestTimeout
+        configuration.timeoutIntervalForResource = Self.resourceTimeout
         configuration.waitsForConnectivity = false
         self.session = URLSession(configuration: configuration)
         self.currentPort = resolvedURL.port ?? 16800
@@ -305,6 +353,16 @@ actor Aria2RPCService {
         guard port != currentPort else { return }
         currentPort = port
         self.rpcURL = URL(string: "http://localhost:\(port)/jsonrpc")!
+        Task {
+            await MatrixDebugLogger.shared.log(
+                event: "rpc.updatePort",
+                metadata: [
+                    "port": String(port),
+                    "url": rpcURL.absoluteString
+                ],
+                level: .info
+            )
+        }
     }
 
     func getCurrentPort() -> Int {
@@ -315,44 +373,203 @@ actor Aria2RPCService {
         requestID += 1
         return String(requestID)
     }
+
+    nonisolated static func isTransientTransportError(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        guard nsError.domain == NSURLErrorDomain else { return false }
+
+        switch nsError.code {
+        case NSURLErrorTimedOut,
+             NSURLErrorCannotFindHost,
+             NSURLErrorCannotConnectToHost,
+             NSURLErrorNetworkConnectionLost:
+            return true
+        default:
+            return false
+        }
+    }
+
+    nonisolated static func missingGID(from message: String) -> String? {
+        let prefix = "GID "
+        let suffix = " is not found"
+        guard message.hasPrefix(prefix), message.hasSuffix(suffix) else { return nil }
+        return String(message.dropFirst(prefix.count).dropLast(suffix.count))
+    }
+
+    nonisolated static func isActiveDownloadNotFound(_ message: String) -> Bool {
+        message.contains("Active Download not found")
+    }
+
+    nonisolated static func isDownloadResultNotFound(_ message: String) -> Bool {
+        message.contains("Download Result not found")
+            || message.contains("GID")
+            && message.contains("is not found")
+    }
+
+    nonisolated private static func responsePreview(from data: Data) -> String? {
+        guard !data.isEmpty else { return "<empty>" }
+
+        let text = String(decoding: data.prefix(240), as: UTF8.self)
+            .replacingOccurrences(of: "\n", with: " ")
+            .replacingOccurrences(of: "\r", with: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        return text.isEmpty ? "<non-text \(data.count) bytes>" : text
+    }
     
     private func sendRequest<T: Codable>(method: String, params: [Any] = [], usesAria2Namespace: Bool = true) async throws -> T {
-        let id = generateID()
-        let request = Aria2Request(
-            jsonrpc: "2.0",
-            id: id,
-            method: usesAria2Namespace ? "aria2.\(method)" : method,
-            params: params.map { AnyCodable($0) }
-        )
-        
-        var urlRequest = URLRequest(url: rpcURL)
-        urlRequest.httpMethod = "POST"
-        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        urlRequest.httpBody = try JSONEncoder().encode(request)
-        
-        let (data, response) = try await session.data(for: urlRequest)
-        
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
-            throw Aria2Error.invalidResponse
+        for attempt in 0...Self.maxRetryCount {
+            do {
+                let id = generateID()
+                let resolvedMethod = usesAria2Namespace ? "aria2.\(method)" : method
+                let request = Aria2Request(
+                    jsonrpc: "2.0",
+                    id: id,
+                    method: resolvedMethod,
+                    params: params.map { AnyCodable($0) }
+                )
+
+                var urlRequest = URLRequest(url: rpcURL)
+                urlRequest.httpMethod = "POST"
+                urlRequest.timeoutInterval = Self.requestTimeout
+                urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                urlRequest.httpBody = try JSONEncoder().encode(request)
+
+                await MatrixDebugLogger.shared.log(
+                    event: "rpc.request",
+                    metadata: [
+                        "attempt": String(attempt),
+                        "id": id,
+                        "method": resolvedMethod,
+                        "paramCount": String(params.count),
+                        "port": String(currentPort),
+                        "url": rpcURL.absoluteString
+                    ],
+                    level: .debug
+                )
+
+                let (data, response) = try await session.data(for: urlRequest)
+
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    await MatrixDebugLogger.shared.log(
+                        event: "rpc.invalidHTTPResponse",
+                        metadata: [
+                            "id": id,
+                            "method": resolvedMethod,
+                            "preview": Self.responsePreview(from: data) ?? "<nil>",
+                            "status": "-1"
+                        ],
+                        level: .error
+                    )
+                    throw Aria2Error.invalidResponse
+                }
+
+                await MatrixDebugLogger.shared.log(
+                    event: "rpc.response",
+                    metadata: [
+                        "bytes": String(data.count),
+                        "id": id,
+                        "method": resolvedMethod,
+                        "preview": Self.responsePreview(from: data) ?? "<nil>",
+                        "status": String(httpResponse.statusCode)
+                    ],
+                    level: .debug
+                )
+
+                let decodedResponse: Aria2Response<T>
+                do {
+                    decodedResponse = try JSONDecoder().decode(Aria2Response<T>.self, from: data)
+                } catch {
+                    await MatrixDebugLogger.shared.log(
+                        event: "rpc.decodeError",
+                        metadata: [
+                            "error": error.localizedDescription,
+                            "id": id,
+                            "method": resolvedMethod,
+                            "preview": Self.responsePreview(from: data) ?? "<nil>"
+                        ],
+                        level: .error
+                    )
+                    throw Aria2Error.decodingError(
+                        underlying: error,
+                        responsePreview: Self.responsePreview(from: data)
+                    )
+                }
+
+                if let error = decodedResponse.error {
+                    if httpResponse.statusCode != 200 {
+                        await MatrixDebugLogger.shared.log(
+                            event: "rpc.invalidHTTPResponse",
+                            metadata: [
+                                "id": id,
+                                "method": resolvedMethod,
+                                "preview": Self.responsePreview(from: data) ?? "<nil>",
+                                "status": String(httpResponse.statusCode)
+                            ],
+                            level: .error
+                        )
+                    }
+                    await MatrixDebugLogger.shared.log(
+                        event: "rpc.rpcError",
+                        metadata: [
+                            "code": String(error.code),
+                            "id": id,
+                            "message": error.message,
+                            "method": resolvedMethod
+                        ],
+                        level: .error
+                    )
+                    throw Aria2Error.rpcError(error.message)
+                }
+
+                guard httpResponse.statusCode == 200 else {
+                    await MatrixDebugLogger.shared.log(
+                        event: "rpc.invalidHTTPResponse",
+                        metadata: [
+                            "id": id,
+                            "method": resolvedMethod,
+                            "preview": Self.responsePreview(from: data) ?? "<nil>",
+                            "status": String(httpResponse.statusCode)
+                        ],
+                        level: .error
+                    )
+                    throw Aria2Error.invalidResponse
+                }
+
+                guard let result = decodedResponse.result else {
+                    await MatrixDebugLogger.shared.log(
+                        event: "rpc.emptyResult",
+                        metadata: [
+                            "id": id,
+                            "method": resolvedMethod
+                        ],
+                        level: .error
+                    )
+                    throw Aria2Error.invalidResponse
+                }
+
+                return result
+            } catch {
+                let shouldRetry = attempt < Self.maxRetryCount && Self.isTransientTransportError(error)
+                await MatrixDebugLogger.shared.log(
+                    event: "rpc.requestError",
+                    metadata: [
+                        "attempt": String(attempt),
+                        "error": error.localizedDescription,
+                        "method": usesAria2Namespace ? "aria2.\(method)" : method,
+                        "retry": shouldRetry ? "true" : "false"
+                    ],
+                    level: .error
+                )
+                if shouldRetry {
+                    try? await Task.sleep(for: .milliseconds(300 * (attempt + 1)))
+                    continue
+                }
+                throw error
+            }
         }
-        
-        let decodedResponse: Aria2Response<T>
-        do {
-            decodedResponse = try JSONDecoder().decode(Aria2Response<T>.self, from: data)
-        } catch {
-            throw Aria2Error.decodingError(error)
-        }
-        
-        if let error = decodedResponse.error {
-            throw Aria2Error.rpcError(error.message)
-        }
-        
-        guard let result = decodedResponse.result else {
-            throw Aria2Error.invalidResponse
-        }
-        
-        return result
+
+        throw Aria2Error.invalidResponse
     }
 
     private func statusParams(gid: String, keys: [String]?) -> [Any] {
@@ -429,8 +646,8 @@ actor Aria2RPCService {
         return try await sendRequest(method: "tellStatus", params: params)
     }
 
-    func getStatuses(gids: [String], keys: [String]? = nil) async throws -> [Aria2Status] {
-        guard !gids.isEmpty else { return [] }
+    func getStatusesBatch(gids: [String], keys: [String]? = nil) async throws -> (statuses: [Aria2Status], missingGIDs: [String]) {
+        guard !gids.isEmpty else { return (statuses: [], missingGIDs: []) }
 
         let calls = gids.map { gid in
             [
@@ -438,12 +655,33 @@ actor Aria2RPCService {
                 "params": statusParams(gid: gid, keys: keys)
             ]
         }
-        let results: [[Aria2Status]] = try await sendRequest(
+        let results: [Aria2MulticallItem<Aria2Status>] = try await sendRequest(
             method: "system.multicall",
             params: [calls],
             usesAria2Namespace: false
         )
-        return results.compactMap(\.first)
+        for (index, item) in results.enumerated() where item.error != nil {
+            await MatrixDebugLogger.shared.log(
+                event: "rpc.multicallItemError",
+                metadata: [
+                    "errorCode": String(item.error?.code ?? -1),
+                    "errorMessage": item.error?.message ?? "<nil>",
+                    "gid": gids.indices.contains(index) ? gids[index] : "<unknown>",
+                    "index": String(index)
+                ],
+                level: .error
+            )
+        }
+        let missingGIDs: [String] = results.compactMap { item in
+            guard let error = item.error else { return nil }
+            return Self.missingGID(from: error.message)
+        }
+        return (statuses: results.flatMap(\.values), missingGIDs: missingGIDs)
+    }
+
+    func getStatuses(gids: [String], keys: [String]? = nil) async throws -> [Aria2Status] {
+        let result = try await getStatusesBatch(gids: gids, keys: keys)
+        return result.statuses
     }
 
     func getFiles(gid: String) async throws -> [Aria2File] {
@@ -477,15 +715,38 @@ actor Aria2RPCService {
 
     func removeDownload(gid: String) async throws -> String {
         let params: [Any] = [gid]
-        // remove returns a string (GID) directly
-        let resultGid: String = try await sendRequest(method: "remove", params: params)
-        return resultGid
+        do {
+            let resultGid: String = try await sendRequest(method: "remove", params: params)
+            return resultGid
+        } catch Aria2Error.rpcError(let message) where Self.isActiveDownloadNotFound(message) {
+            await MatrixDebugLogger.shared.log(
+                event: "rpc.removeDownload.alreadyInactive",
+                metadata: [
+                    "gid": gid,
+                    "message": message
+                ],
+                level: .info
+            )
+            return gid
+        }
     }
 
     func removeDownloadResult(gid: String) async throws -> String {
         let params: [Any] = [gid]
-        let resultGid: String = try await sendRequest(method: "removeDownloadResult", params: params)
-        return resultGid
+        do {
+            let resultGid: String = try await sendRequest(method: "removeDownloadResult", params: params)
+            return resultGid
+        } catch Aria2Error.rpcError(let message) where Self.isDownloadResultNotFound(message) {
+            await MatrixDebugLogger.shared.log(
+                event: "rpc.removeDownloadResult.alreadyMissing",
+                metadata: [
+                    "gid": gid,
+                    "message": message
+                ],
+                level: .info
+            )
+            return gid
+        }
     }
     
     func getActiveDownloads(keys: [String]? = nil) async throws -> [Aria2Status] {
